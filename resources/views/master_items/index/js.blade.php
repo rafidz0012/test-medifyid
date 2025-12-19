@@ -40,24 +40,38 @@
                 var data = results.data
 
                 $.each(data, function(index, item) {
-                    array_temp = [];
-                    var harga_jual = item.harga_beli + item.harga_beli * item.laba / 100;
-                    harga_jual = Math.round(harga_jual)
-                    var kode = item.kode;
 
-                    var html = `<a href="{{url('master-items/view/')}}/` + kode + `" class="btn btn-primary">View</a>`
+                    var harga_jual = Math.round(
+                        item.harga_beli + (item.harga_beli * item.laba / 100)
+                    );
 
-                    $.each(item, function(obj_name, obj_value) {
-                        if (obj_name == 'laba') return false;
-                        array_temp.push(obj_value)
-                    })
-                    array_temp.push(harga_jual)
-                    array_temp.push(item.supplier)
-                    array_temp.push(html)
+                    var img = '-';
+                    if (item.img) {
+                        img = `<img src="/storage/${item.img}"
+                                    width="60"
+                                    class="img-thumbnail">`;
+                    }
 
+                    var html = `
+                        <a href="{{ url('master-items/view') }}/${item.kode}"
+                        class="btn btn-primary btn-sm">
+                        View
+                        </a>
+                    `;
 
-                    dataTableObj.row.add(array_temp).draw(true);
+                    dataTableObj.row.add([
+                        img,
+                        item.kode,
+                        item.nama,
+                        item.harga_beli,
+                        item.laba,
+                        harga_jual,
+                        item.supplier,
+                        html
+                    ]).draw(false);
                 });
+
+
                 $('#loading-filter').hide();
             },
             error: function(xhr, textStatus, errorThrown) {

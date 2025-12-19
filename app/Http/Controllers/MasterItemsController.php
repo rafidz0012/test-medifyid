@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\MasterItem;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use App\Models\Category;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\MasterItemsExportExcel;
 
 class MasterItemsController extends Controller
 {
@@ -14,25 +18,35 @@ class MasterItemsController extends Controller
 
     public function search(Request $request)
     {
-        $kode = $request->kode;
-        $nama = $request->nama;
-        $hargamin = $request->hargamin;
-        $hargamax = $request->hargamax;
-
         $data_search = MasterItem::query();
 
-        if (!empty($kode)) $data_search = $data_search->where('kode', $kode);
-        if (!empty($nama)) $data_search = $data_search->where('nama', 'LIKE', '%' . $nama . '%');
-        if (!empty($hargamin)) $data_search = $data_search->where('harga_beli', '>=', $hargamin)->where('harga_beli', '<=', $hargamax);
+        if ($request->filled('kode')) {
+            $data_search->where('kode', $request->kode);
+        }
 
-        $data_search = $data_search->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier')->orderBy('id')->get();
+        if ($request->filled('nama')) {
+            $data_search->where('nama', 'LIKE', '%' . $request->nama . '%');
+        }
 
+        if ($request->filled('hargamin')) {
+            $data_search->where('harga_beli', '>=', $request->hargamin);
+        }
 
-        return json_encode([
+        if ($request->filled('hargamax')) {
+            $data_search->where('harga_beli', '<=', $request->hargamax);
+        }
+
+        $data = $data_search
+            ->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier', 'img')
+            ->orderBy('id')
+            ->get();
+
+        return response()->json([
             'status' => 200,
-            'data' => $data_search
+            'data' => $data
         ]);
     }
+
 
     public function formView($method, $id = 0)
     {
@@ -43,6 +57,7 @@ class MasterItemsController extends Controller
         }
         $data['item'] = $item;
         $data['method'] = $method;
+        $data['categories'] = Category::all();
         return view('master_items.form.index', $data);
     }
 
@@ -65,6 +80,17 @@ class MasterItemsController extends Controller
             $kode = $data_item->kode;
         }
 
+        if ($request->hasFile('img')) {
+
+            // hapus gambar lama saat edit
+            if ($method != 'new' && $data_item->img) {
+                Storage::disk('public')->delete($data_item->img);
+            }
+
+            $path = $request->file('img')->store('master-items', 'public');
+            $data_item->img = $path;
+        }
+
         $data_item->nama = $request->nama;
         $data_item->harga_beli = $request->harga_beli;
         $data_item->laba = $request->laba;
@@ -72,6 +98,12 @@ class MasterItemsController extends Controller
         $data_item->supplier = $request->supplier;
         $data_item->jenis = $request->jenis;
         $data_item->save();
+
+        if($request->has('categories')){
+            $data_item->categories()->sync($request->categories);
+        } else {
+            $data_item->categories()->sync([]);
+        }
 
         return redirect('master-items');
     }
@@ -111,5 +143,9 @@ class MasterItemsController extends Controller
         $array = ['Obat','Alkes','Matkes','Umum','ATK'];
         $random = rand(0,4);
         return $array[$random];
+    }
+    public function exportExcel()
+    {
+        return Excel::download(new MasterItemsExportExcel, 'master_items.xlsx');
     }
 }

@@ -13,7 +13,7 @@
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
@@ -51,6 +51,20 @@
                         </li>
                         @endif
                         @else
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('master-items*') ? 'active fw-semibold text-primary' : '' }}"
+                            href="{{ url('/master-items') }}">
+                                Master Item
+                            </a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link {{ request()->is('categories*') ? 'active fw-semibold text-primary' : '' }}"
+                            href="{{ url('/categories') }}">
+                                Kategori
+                            </a>
+                        </li>
+
+
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                 {{ Auth::user()->name }}

@@ -25,9 +25,16 @@ Route::get('/master-items', [App\Http\Controllers\MasterItemsController::class, 
 Route::get('/master-items/search', [App\Http\Controllers\MasterItemsController::class, 'search']);
 Route::get('/master-items/form/{method}/{id?}', [App\Http\Controllers\MasterItemsController::class, 'formView']);
 Route::post('/master-items/form/{method}/{id?}', [App\Http\Controllers\MasterItemsController::class, 'formSubmit']);
-
 Route::get('/master-items/view/{kode}', [App\Http\Controllers\MasterItemsController::class, 'singleView']);
 Route::get('/master-items/delete/{id}', [App\Http\Controllers\MasterItemsController::class, 'delete']);
-
+// Route::resource('categories', App\Http\Controllers\CategoryController::class);
+Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index']);
+Route::get('/categories/search', [App\Http\Controllers\CategoryController::class, 'search']);
+Route::get('/categories/form/{method}/{id?}', [App\Http\Controllers\CategoryController::class, 'formview']);
+Route::post('/categories/form/{method}/{id?}', [App\Http\Controllers\CategoryController::class, 'formSubmit']);
+Route::get('/categories/view/{id}', [App\Http\Controllers\CategoryController::class, 'singleView']);
+Route::get('/categories/delete/{id}', [App\Http\Controllers\CategoryController::class, 'delete']);
+Route::get('/categories/print/{id}', [App\Http\Controllers\CategoryController::class, 'print'])->name('categories.print');
+Route::get('/master-items/export/excel', [App\Http\Controllers\MasterItemsController::class, 'exportExcel'])->name('master-items.export.excel');
 
 Route::get('/master-items/update-random-data', [App\Http\Controllers\MasterItemsController::class, 'updateRandomData']);
